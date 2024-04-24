@@ -1,0 +1,23 @@
+FROM openjdk:8-jdk
+
+ENV SPARK_VERSION=3.4.2
+ENV SPARK_HOME="/opt/spark"
+ENV PATH="/opt/spark/sbin:/opt/spark/bin:${PATH}"
+ENV SPARK_MASTER="spark://spark-master:7077"
+ENV SPARK_MASTER_HOST spark-master
+ENV SPARK_MASTER_PORT 7077
+
+RUN apt-get update \
+    && apt-get install -y curl wget \
+    && mkdir -p "${SPARK_HOME}"
+    # && mkdir -p "${HADOOP_HOME}"
+
+WORKDIR $SPARK_HOME
+
+RUN curl https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz -o spark-${SPARK_VERSION}-bin-hadoop3.tgz \
+    && tar xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz --directory /opt/spark --strip-components 1 \
+    && rm -rf spark-${SPARK_VERSION}-bin-hadoop3.tgz
+
+COPY setup/spark/spark-defaults.conf "$SPARK_HOME/conf"
+COPY setup/spark/entrypoint.sh .
+RUN chmod +x entrypoint.sh
