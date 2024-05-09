@@ -9,8 +9,8 @@ ENV SPARK_MASTER_PORT 7077
 
 RUN apt-get update \
     && apt-get install -y curl wget \
-    && mkdir -p "${SPARK_HOME}"
-    # && mkdir -p "${HADOOP_HOME}"
+    && mkdir -p "${SPARK_HOME}" \
+    && mkdir -p "${HADOOP_HOME}"
 
 WORKDIR $SPARK_HOME
 

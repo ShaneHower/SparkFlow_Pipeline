@@ -126,6 +126,7 @@ services:
       start_period: 30s
     environment:
       <<: *airflow-common-env
+      AIRFLOW_CONN_SPARK_DEFAULT: 'spark://spark-master:7077'
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
