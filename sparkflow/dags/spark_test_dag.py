@@ -4,14 +4,9 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from datetime import datetime, timedelta
 import logging
+import psutil
 
 
-"""
-    TODO: This is finally working.  Some stuff that needs to be done next:
-    1. clean up this repo and get it into git.
-    2. Lets get this launched into an EC2 so I can start setting up SNS, connect to db, etc
-    3. get a lambda to launch this whole thing
-"""
 logging.info('Hello World!')
 default_args = {
     'owner': 'airflow',
@@ -22,7 +17,12 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-# Define the Python functions to be used as tasks
+
+def get_half_system_resources():
+    total_memory = psutil.virtual_memory().total // (1024 * 1024 * 1024)
+    total_cores = psutil.cpu_count()
+    return total_memory // 2, total_cores // 2
+
 def print_hello():
     logging.info("Hello")
 
@@ -30,6 +30,8 @@ def print_world():
     logging.info("World")
 
 def submit_and_forget():
+    memory_alloc, cpu_alloc = get_half_system_resources()
+
     try:
         task = SparkSubmitOperator(
             task_id='submit_spark_test',
@@ -37,12 +39,11 @@ def submit_and_forget():
             name="airflow-spark-test-job",
             conn_id="spark_default",  # Ensure this connection is configured in Airflow
             conf={
-            'spark.driver.port': '4040',
-            'spark.driver.blockManager.port': '4041',
+                'spark.driver.port': '4040',
+                'spark.driver.blockManager.port': '4041',
             },
-            total_executor_cores='4',
-            executor_cores='4',
-            executor_memory='8g',
+            executor_cores=cpu_alloc,
+            executor_memory=f'{memory_alloc}g',
             num_executors='1',
             verbose=True,
             status_poll_interval=0.5,
