@@ -115,7 +115,6 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
-    command: webserver
     ports:
       - "8080:8080"
     healthcheck:
@@ -124,9 +123,12 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
+    entrypoint: ["/bin/bash", "-c"]
+    command: >
+      "airflow connections add 'spark_default' --conn-type 'spark' --conn-host 'spark://spark-master:7077' &&
+       airflow webserver"
     environment:
       <<: *airflow-common-env
-      AIRFLOW_CONN_SPARK_DEFAULT: 'spark://spark-master:7077'
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
