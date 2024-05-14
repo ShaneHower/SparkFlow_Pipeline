@@ -125,7 +125,7 @@ services:
       start_period: 30s
     entrypoint: ["/bin/bash", "-c"]
     command: >
-      "airflow connections add 'spark_default' --conn-uri 'spark://spark-master:7077' &&
+      "airflow connections add 'spark_default' --conn-type 'spark' --conn-host 'spark://spark-master:7077' &&
        airflow webserver"
     environment:
       <<: *airflow-common-env
