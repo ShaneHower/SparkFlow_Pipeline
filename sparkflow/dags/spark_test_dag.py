@@ -50,7 +50,9 @@ def submit_and_forget():
             num_executors='1',
             verbose=True,
             status_poll_interval=0.5,
-            deploy_mode='cluster'
+            deploy_mode='cluster',
+            java_class='com.main.DAGManager',  # Specify the main class here
+            jars='/opt/spark/jars/hadoop-aws-3.3.1.jar,/opt/spark/jars/aws-java-sdk-bundle-1.11.874.jar'
         )
         task.execute(context={})
     except Exception as e:
