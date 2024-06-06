@@ -19,6 +19,11 @@ RUN curl https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SP
     && tar xvzf spark-${SPARK_VERSION}-bin-hadoop3.tgz --directory /opt/spark --strip-components 1 \
     && rm -rf spark-${SPARK_VERSION}-bin-hadoop3.tgz
 
+RUN mkdir -p /opt/spark/jars \
+    && curl -L -o /opt/spark/jars/hadoop-aws-3.3.1.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.1/hadoop-aws-3.3.1.jar \
+    && curl -L -o /opt/spark/jars/aws-java-sdk-bundle-1.11.874.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.874/aws-java-sdk-bundle-1.11.874.jar
+
+
 COPY setup/spark/spark-defaults.conf "$SPARK_HOME/conf"
 COPY setup/spark/entrypoint.sh .
 RUN chmod +x entrypoint.sh
