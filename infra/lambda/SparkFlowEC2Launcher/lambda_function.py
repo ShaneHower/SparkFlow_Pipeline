@@ -33,7 +33,10 @@ def lambda_handler(event, context):
         MinCount=1,
         InstanceInitiatedShutdownBehavior='terminate',
         BlockDeviceMappings=block_device_mappings,
-        UserData=init_script
+        UserData=init_script,
+        IamInstanceProfile={
+            'Name': 'EC2'
+        }
     )
 
     instance_id = instance['Instances'][0]['InstanceId']

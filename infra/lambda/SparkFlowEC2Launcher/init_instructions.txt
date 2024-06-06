@@ -10,10 +10,11 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 cd sparkflow
 git clone https://github.com/ShaneHower/SparkFlow_Pipeline.git .
-cd sparkflow
 echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" | sudo tee .env > /dev/null
+cd sparkflow
+chmod -R 775 logs
 sudo service docker start
 sudo groupadd docker
 sudo usermod -aG docker ec2-user
 newgrp docker
-docker-compose up
+docker-compose up 
