@@ -5,11 +5,11 @@ import software.amazon.awssdk.auth.credentials.{ProfileCredentialsProvider, AwsC
 import org.apache.hadoop.fs.s3a.S3AFileSystem
 
 
-object Config {
-    val credentials: AwsCredentials = ProfileCredentialsProvider.create().resolveCredentials()
-    val accessKeyId: String = credentials.accessKeyId()
-    val secretAccessKey: String = credentials.secretAccessKey()
-}
+// object Config {
+//     val credentials: AwsCredentials = ProfileCredentialsProvider.create().resolveCredentials()
+//     val accessKeyId: String = credentials.accessKeyId()
+//     val secretAccessKey: String = credentials.secretAccessKey()
+// }
 
 
 object DAGManager {
@@ -18,8 +18,9 @@ object DAGManager {
         println("starting connection")
         val spark = SparkSession.builder()
             .appName("Read S3 Test")
-            .config("spark.hadoop.fs.s3a.access.key", Config.accessKeyId)
-            .config("spark.hadoop.fs.s3a.secret.key", Config.secretAccessKey)
+            // NOTE: These are used when locally developing we may want to add functionality of "local" vs "cloud" development
+            // .config("spark.hadoop.fs.s3a.access.key", Config.accessKeyId)
+            // .config("spark.hadoop.fs.s3a.secret.key", Config.secretAccessKey)
             .config("spark.hadoop.fs.s3a.impl", classOf[S3AFileSystem].getName)
             .config("spark.hadoop.fs.s3a.endpoint", "s3.amazonaws.com")
             .config("spark.hadoop.fs.s3a.path.style.access", "true")

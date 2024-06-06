@@ -35,24 +35,16 @@ def submit_and_forget():
     try:
         task = SparkSubmitOperator(
             task_id='submit_spark_test',
-            application="s3a://picklepokeyhouse/sparkflow_jars/dag-manager_2.12-1.0.jar",  # Path inside the container
+            application="s3a://picklepokeyhouse/sparkflow_jars/dag-manager_2.12-1.0.jar", 
             name="airflow-spark-test-job",
-            conn_id="spark_default",  # Ensure this connection is configured in Airflow
-            conf={
-                'spark.driver.port': '4040',
-                'spark.driver.blockManager.port': '4041',
-                'spark.hadoop.fs.s3a.impl': 'org.apache.hadoop.fs.s3a.S3AFileSystem',
-                'spark.hadoop.fs.s3a.endpoint': 's3.amazonaws.com',
-                'spark.hadoop.fs.s3a.path.style.access': 'true'
-            },
+            conn_id="spark_default",
             executor_cores=cpu_alloc,
             executor_memory=f'{memory_alloc}g',
             num_executors='1',
             verbose=True,
             status_poll_interval=0.5,
             deploy_mode='cluster',
-            java_class='com.main.DAGManager',  # Specify the main class here
-            jars='/opt/spark/jars/hadoop-aws-3.3.1.jar,/opt/spark/jars/aws-java-sdk-bundle-1.11.874.jar'
+            java_class='com.main.DAGManager'
         )
         task.execute(context={})
     except Exception as e:
