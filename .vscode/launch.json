@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python: Launch Development Environment",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/infra/cloud_develop/launch_develop_env.py",
+            "console": "integratedTerminal",
+            "env": {},
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

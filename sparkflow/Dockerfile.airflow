@@ -13,7 +13,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 USER airflow
-RUN pip install apache-airflow
-RUN pip install apache-airflow-providers-apache-spark
+COPY setup/airflow/requirements.txt .
+RUN pip install -r requirements.txt
 
 COPY setup/airflow/establish_connection.sh .
