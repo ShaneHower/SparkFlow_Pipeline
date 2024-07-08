@@ -1,20 +1,40 @@
 #!/bin/bash
-cd /home/ec2-user
-mkdir sparkflow
+
+# Update and install necessary packages
 sudo yum update -y
 sudo yum install git -y
-
 sudo yum install docker -y
+
+# Install Docker
 sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
-cd sparkflow
-git clone https://github.com/ShaneHower/SparkFlow_Pipeline.git .
-echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" | sudo tee .env > /dev/null
-cd sparkflow
-chmod -R 775 logs
+# Set up docker
 sudo service docker start
 sudo groupadd docker
 sudo usermod -aG docker ec2-user
+
+# Switch to ec2-user for the rest of the setup
+sudo -u ec2-user -i <<'EOF'
+
+# Set up repo
+mkdir -p /home/ec2-user/sparkflow
+cd /home/ec2-user/sparkflow
+git clone https://github.com/ShaneHower/SparkFlow_Pipeline.git .
+
+# Fetch the GitHub token from Lambda environment variable using AWS CLI
+GIT_PASS_KEY=$(aws lambda get-function-configuration --function-name your_lambda_function_name --query 'Environment.Variables.GIT_PASS_KEY' --output text)
+git remote set-url origin https://ShaneHower:${GIT_PASS_KEY}github.com/ShaneHower/SparkFlow_Pipeline.git .
+
+# Set up environment variables permissions for Airflow
+echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" | sudo tee .env > /dev/null
+chmod -R 775 sparkflow/logs
+
+# launch containers
+cd sparkflow
 newgrp docker
-docker-compose up 
+docker-compose up
+EOF
+
+# Change ownership of sparkflow directory to ec2-user
+sudo chown -R ec2-user:ec2-user /home/ec2-user/sparkflow

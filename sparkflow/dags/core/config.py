@@ -14,7 +14,7 @@ class Config:
         """
         # S3 info
         self.bucket_name = 'picklepokeyhouse'
-        self.input_location = 'finances/monitored_input'
+        self.input_location = 'finances/monitored_input/input'
         self.jar_location = 's3a://picklepokeyhouse/sparkflow_jars'
 
 

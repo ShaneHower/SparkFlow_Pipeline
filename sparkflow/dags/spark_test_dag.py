@@ -17,7 +17,7 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 FILE_TYPE = 'capital_one'
 
 def check_s3_file(config: Config):
-    prefix = f'{config.input_location}/input/{FILE_TYPE}/'
+    prefix = f'{config.input_location}/{FILE_TYPE}/'
     keys = S3Hook().list_keys(bucket_name=config.bucket_name, prefix=prefix)
 
     if keys:
