@@ -1,0 +1,82 @@
+name: 'Terraform Plan'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: "Terraform Deploy"
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # Initialize env
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        id: aws_conn
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GithubActionsRole
+          aws-region: us-east-1
+
+      - name: Checkout the repo to the runner
+        id: repo_init
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        id: python_init
+        with:
+          python-version: 3.10
+
+      # Deploy code
+      - name: Execute Deploy Lambda
+        working-directory: ./infra
+        id: deploy_lambda
+        run: |
+          python deploy_code.py --lambda
+
+      - name: Execute Deploy SparkFlow
+        working-directory: ./infra
+        id: deploy_sparkflow
+        run: |
+          python deploy_code.py --sparkflow
+
+      # Run Terraform
+      - name: Setup Terraform with specified version on the runner
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.7.2
+
+      - name: Terraform init
+        working-directory: ./terraform
+        id: terra_init
+        run: terraform init
+
+      - name: terraform format
+        working-directory: ./terraform
+        id: terra_format
+        run: terraform fmt -check
+
+      - name: Terraform validate
+        working-directory: ./terraform
+        id: terra_validate
+        run: terraform validate
+
+      - name: Terraform plan
+        working-directory: ./terraform
+        id: terra_plan
+        run: terraform plan -no-color -input=false
+
+      - name: Terraform apply
+        working-directory: ./terraform
+        id: terra_apply
+        env:
+          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          S3_BUCKET: ${{ secrets.S3_bucket }}
+        run: |
+          terraform apply \
+            -var "aws_account=${AWS_ACCOUNT}" \
+            -var "s3_bucket=${S3_BUCKET}" \
+            -auto-approve
