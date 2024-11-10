@@ -35,13 +35,13 @@ jobs:
         working-directory: ./infra
         id: deploy_lambda
         run: |
-          python deploy_lambda.py
+          python deploy_code.py --lambda
 
-      - name: Execute Deploy Code
+      - name: Execute Deploy SparkFlow
         working-directory: ./infra
-        id: deploy_code
+        id: deploy_sparkflow
         run: |
-          python deploy_code.py
+          python deploy_code.py --sparkflow
 
       # Run Terraform
       - name: Setup Terraform with specified version on the runner
