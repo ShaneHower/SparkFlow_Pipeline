@@ -11,7 +11,14 @@ BUCKET = 'picklepokeyhouse'
 def zip_folder(location: Path):
     # Grab the zip name.  We are just saving to the location we are running in since it is temporary a VM
     zip_name = str(location).split(os.sep)[-1]
-    output_zip = f'{zip_name}.zip'
+
+    # We want to write the zips to the terraform directory.  This allows us to track the lambda code changes with terraform
+    # so that it can refresh the lambda code when needed.
+    repo_path = Path(__file__).resolve().parents[1]
+    terraform_path = repo_path / 'terraform'
+    output_zip = str(terraform_path / f'{zip_name}.zip')
+
+    # Execute the zip
     with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(location):
             for file in files:

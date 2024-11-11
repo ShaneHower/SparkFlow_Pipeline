@@ -12,9 +12,8 @@ jobs:
       contents: read
 
     steps:
-      # Initialize env
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         id: aws_conn
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GithubActionsRole
@@ -22,15 +21,18 @@ jobs:
 
       - name: Checkout the repo to the runner
         id: repo_init
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         id: python_init
         with:
-          python-version: 3.10
+          python-version: 3.10.7
 
-      # Deploy code
+      # Need boto3 to send files to S3
+      - name: Install boto3
+        run: pip install boto3
+
       - name: Execute Deploy Lambda
         working-directory: ./infra
         id: deploy_lambda
@@ -43,7 +45,6 @@ jobs:
         run: |
           python deploy_code.py --sparkflow
 
-      # Run Terraform
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
         with:
@@ -67,16 +68,16 @@ jobs:
       - name: Terraform plan
         working-directory: ./terraform
         id: terra_plan
-        run: terraform plan -no-color -input=false
+        env:
+          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: terraform plan -no-color -var "aws_account=${AWS_ACCOUNT}" -input=false
 
       - name: Terraform apply
         working-directory: ./terraform
         id: terra_apply
         env:
           AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
-          S3_BUCKET: ${{ secrets.S3_bucket }}
         run: |
           terraform apply \
             -var "aws_account=${AWS_ACCOUNT}" \
-            -var "s3_bucket=${S3_BUCKET}" \
             -auto-approve

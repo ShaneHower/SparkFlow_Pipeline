@@ -9,7 +9,7 @@ terraform {
   required_version = ">= 1.2.0"
 
   backend "s3" {
-    bucket = var.s3_bucket
+    bucket = "picklepokeyhouse"
     key    = "terraform/spark_flow/terraform.tfstate"
     region = "us-east-1"
   }
@@ -24,16 +24,12 @@ variable "aws_account" {
   type        = string
 }
 
-variable "s3_bucket" {
-  description = "The S3 bucket containing the Lambda deployment package"
-  type        = string
-}
-
 resource "aws_lambda_function" "airflow_lambda" {
-  function_name = "airflow_launcher"
-  role = "arn:aws:iam::${var.aws_account}:role/EC2"
-  handler = "lambda_function.lambda_handler"
-  runtime = "python3.12"
-  s3_bucket = var.s3_bucket
-  s3_key = "spark_flow/lambda/code.zip"
+  function_name    = "airflow_launcher"
+  role             = "arn:aws:iam::${var.aws_account}:role/SparkFlowLambdaRole"
+  handler          = "lambda_function.lambda_handler"
+  runtime          = "python3.9"
+  s3_bucket        = "picklepokeyhouse"
+  s3_key           = "spark_flow/lambda/code.zip"
+  source_code_hash = filebase64sha256("lambda.zip")
 }

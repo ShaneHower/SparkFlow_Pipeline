@@ -1,10 +1,9 @@
-import os
 import boto3
 
-AMI = os.environ['AMI']
-INSTANCE_TYPE = os.environ['INSTANCE_TYPE']
-KEY_NAME = os.environ['KEY_NAME']
-REGION = os.environ['REGION']
+AMI = "ami-0a699202e5027c10d"
+INSTANCE_TYPE = "t2.large"
+KEY_NAME = "SparkFlow"
+REGION = "us-east-1"
 
 ec2 = boto3.client('ec2', region_name=REGION)
 
