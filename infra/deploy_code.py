@@ -24,7 +24,7 @@ def zip_folder(location: Path):
             for file in files:
                 file_path = os.path.join(root, file)
                 # Preserve the folder structure by adding relative paths
-                arcname = os.path.relpath(file_path, start=location)
+                arcname = os.path.basename(file_path) # , start=location)
                 zipf.write(file_path, arcname)
 
     return output_zip

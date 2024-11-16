@@ -1,5 +1,4 @@
 # This airflow docker compose is based on the recommended docker compose here - https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml
-# This docker-compose has been edited so that a spark cluster is included in the application.
 version: '3.8'
 
 x-airflow-common:
@@ -25,7 +24,6 @@ x-airflow-common:
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
-    - ./data:/opt/spark/data
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -35,52 +33,6 @@ x-airflow-common:
       condition: service_healthy
 
 services:
-
-  # SPARK CONTAINERS
-  spark-master:
-    container_name: da-spark-master
-    build:
-      context: .
-      dockerfile: Dockerfile.spark
-    image: da-spark-image
-    entrypoint: ['./entrypoint.sh', 'master']
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-    volumes:
-      - ./data:/opt/spark/data
-      - spark-logs:/opt/spark/spark-events
-    env_file:
-      - ./setup/spark/.env.spark
-    ports:
-      - '9090:8080'
-      - '7077:7077'
-
-  spark-history-server:
-    container_name: da-spark-history
-    image: da-spark-image
-    entrypoint: ['./entrypoint.sh', 'history']
-    depends_on:
-      - spark-master
-    env_file:
-      - ./setup/spark/.env.spark
-    volumes:
-      - spark-logs:/opt/spark/spark-events
-    ports:
-      - '18080:18080'
-
-  spark-worker:
-    image: da-spark-image
-    entrypoint: ['./entrypoint.sh', 'worker']
-    depends_on:
-      - spark-master
-    env_file:
-      - ./setup/spark/.env.spark
-    volumes:
-      - ./data:/opt/spark/data
-      - spark-logs:/opt/spark/spark-events
 
   # AIRFLOW
   postgres:
@@ -122,8 +74,7 @@ services:
       start_period: 30s
     entrypoint: ["/bin/bash", "-c"]
     command: >
-      "airflow connections add 'spark_default' --conn-type 'spark' --conn-host 'spark://spark-master:7077' &&
-       airflow webserver"
+      "airflow webserver"
     environment:
       <<: *airflow-common-env
     restart: always
@@ -264,4 +215,3 @@ services:
 
 volumes:
   postgres-db-volume:
-  spark-logs:
